@@ -74,3 +74,20 @@ body {
 .box h3 {
   font-size: 24px;
 }
+.unit-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 20px;
+  background: white;
+  color: #333;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.unit-button:hover {
+  background: #16293b;
+  color: white;
+}
