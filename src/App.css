@@ -91,3 +91,21 @@ body {
   background: #16293b;
   color: white;
 }
+.location-button {
+  margin-top: 20px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 25px;
+  background: #16293b;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.location-button:hover {
+  background: #ffffff;
+  color: #16293b;
+  transform: scale(1.05);
+}
+

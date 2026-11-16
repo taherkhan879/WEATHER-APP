@@ -6,6 +6,7 @@ function App() {
   const [weather, setWeather] = useState(null);
   const [unit, setUnit] = useState("C");
 
+  // Search weather by city
   const getWeather = async () => {
     if (!city.trim()) return;
 
@@ -42,13 +43,80 @@ function App() {
     }
   };
 
-  // Convert Celsius to Fahrenheit
-  const convertTemperature = () => {
-    if (unit === "C") {
-      setUnit("F");
-    } else {
-      setUnit("C");
+  // Get current location weather
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          // Get city name from coordinates
+const locationResponse = await fetch(
+  `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+);
+
+const locationData = await locationResponse.json();
+
+const cityName =
+  locationData.address?.city ||
+  locationData.address?.town ||
+  locationData.address?.village ||
+  locationData.address?.municipality ||
+  locationData.address?.suburb ||
+  locationData.address?.county ||
+  "Your Current Location";
+
+          const response = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`
+          );
+
+          if (!response.ok) {
+            throw new Error("Weather API request failed");
+          }
+
+          const data = await response.json();
+
+         setWeather({
+  city: cityName,
+  temp: data.current.temperature_2m,
+  humidity: data.current.relative_humidity_2m,
+  wind: data.current.wind_speed_10m,
+});
+
+        } catch (error) {
+          console.error(error);
+          alert("Unable to fetch weather data.");
+        }
+      },
+
+      (error) => {
+        console.error(error);
+
+        if (error.code === 1) {
+          alert("Please allow location permission.");
+        } else if (error.code === 2) {
+          alert("Location unavailable.");
+        } else {
+          alert("Location request timed out.");
+        }
+      },
+
+      {
+        enableHighAccuracy: false,
+        timeout: 15000,
+        maximumAge: 60000,
+      }
+    );
+  };
+
+  // Celsius and Fahrenheit conversion
+  const convertTemperature = () => {
+    setUnit(unit === "C" ? "F" : "C");
   };
 
   const temperature =
@@ -72,6 +140,14 @@ function App() {
 
           <button onClick={getWeather}>🔍</button>
         </div>
+
+        {/* Current Location Button */}
+        <button
+          className="location-button"
+          onClick={getCurrentLocation}
+        >
+          📍 Use My Current Location
+        </button>
 
         {weather && (
           <div className="weather">
@@ -104,6 +180,7 @@ function App() {
             </div>
           </div>
         )}
+
       </div>
     </div>
   );
